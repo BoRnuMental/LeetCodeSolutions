@@ -1,8 +1,23 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Metrics;
+using System.Linq;
+using System.Text;
 
 namespace LeetCode
 {
-    internal static class LeetCodeProblems
+    public class TreeNode 
+    {
+        #pragma warning disable CS8625
+        public int val;
+        public TreeNode left;
+        public TreeNode right;  
+        public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
+        {
+            this.val = val;
+            this.left = left;
+            this.right = right;
+        }
+    }
+    internal static class LeetCodeSolutions
     {
         //Методы названы именами заданий и сортированы в алфавитном порядке ради удобства
 
@@ -40,6 +55,41 @@ namespace LeetCode
         }
         #endregion
 
+        #region Contains Duplicate
+        public static bool ContainsDuplicate(int[] nums)
+        {
+            HashSet<int> set = new HashSet<int>(nums.Length);
+            for(int i = 0; i < nums.Length; i++)
+            {
+                if (set.Contains(nums[i])) return true;
+                set.Add(nums[i]);
+            }
+            return false;
+        }
+        #endregion
+
+        #region Contains Duplicate II
+
+        public static bool ContainsDuplicateII(int[] nums, int k)
+        {
+            Dictionary<int, int> dict = new Dictionary<int, int>(nums.Length);
+            for (int i = 0; i < nums.Length; i++)
+            {
+                if (dict.ContainsKey(nums[i]))
+                {
+                    if (k >= i - dict[nums[i]]) return true;
+                    dict[nums[i]] = i;
+                }
+                else
+                {
+                    dict.Add(nums[i], i);
+                }
+            }
+            return false;
+        }
+
+        #endregion
+
         #region Decode The Message
         public static string DecodeTheMessage(string key, string message)
         {
@@ -65,6 +115,40 @@ namespace LeetCode
                 answer.Append(decodingAlphabet[message[i]]);
             }
             return answer.ToString();
+        }
+        #endregion
+
+        #region First Letter to Appear Twice
+        public static char FirstLetterToAppearTwice(string s)
+        {
+            HashSet<char> uniqueChars = new HashSet<char>();
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (uniqueChars.Contains(s[i])) return s[i];
+                uniqueChars.Add(s[i]);
+            }
+            return '\u0000';
+        }
+        #endregion
+
+        #region Fizz Buzz
+        public static IList<string> FizzBuzz(int n)
+        {
+            var answer = new string[n];
+            for (int i = 2; i < n; i += 3)
+            {
+                answer[i] = "Fizz";
+            }
+            for (int i = 4; i < n; i += 5)
+            {
+                if (answer[i] != null) answer[i] = "FizzBuzz";
+                else answer[i] = "Buzz";
+            }
+            for (int i = 0; i < n; i++)
+            {
+                if (answer[i] == null) answer[i] = (i + 1).ToString();
+            }
+            return answer;
         }
         #endregion
 
@@ -125,6 +209,23 @@ namespace LeetCode
         }
         #endregion
 
+        #region Invert Binary Tree
+        public static TreeNode InvertBinaryTree(TreeNode root)
+        {
+            SwapRefs(root, null);
+            return root;
+        }
+        private static void SwapRefs(TreeNode currentNode, TreeNode temp)
+        {
+            if (currentNode == null) return;
+            temp = currentNode.left;
+            currentNode.left = currentNode.right;
+            currentNode.right = temp;
+            SwapRefs(currentNode.left, temp);
+            SwapRefs(currentNode.right, temp);
+        } 
+        #endregion  
+
         #region Jewels In Stones
         public static int JewelsInStones(string jewels, string stones)
         {
@@ -167,6 +268,19 @@ namespace LeetCode
             }
             return String.Join("", commonPrefix);
         }
+        #endregion
+
+        #region Maximum Depth of Binary Tree
+        public static int MaximumDepthOfBinaryTree(TreeNode root)
+        {
+            return GetDepth(root);
+        }
+        private static int GetDepth(TreeNode currentNode)
+        {
+            if (currentNode == null) return 0;
+            return 1 + Math.Max(GetDepth(currentNode.left), GetDepth(currentNode.right));
+        }
+
         #endregion
 
         #region Merge Two 2D Arrays By Summing Values
@@ -234,6 +348,41 @@ namespace LeetCode
         }
         #endregion
 
+        #region Range Sum of BST
+        public static int RangeSumOfBST(TreeNode root, int low, int high)
+        {
+            return TraverseTree(root, low, high);
+        }
+        private static int TraverseTree(TreeNode current, int low, int high)
+        {
+            if (current == null) return 0;
+            if (current.val >= low && current.val <= high)
+            {
+                return current.val + TraverseTree(current.left, low, high) + TraverseTree(current.right, low, high);
+            }
+            else if (current.val < low)
+            {
+                return TraverseTree(current.right, low, high);
+            }
+            else if (current.val > high)
+            {
+                return TraverseTree(current.left, low, high);
+            }
+            return 0;
+        }
+        #endregion
+
+        #region Rectangle Area
+        public static int RectangleArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
+        {
+            int width = Math.Min(ax2, bx2) - Math.Max(ax1, bx1);
+            int height = Math.Min(ay2, by2) - Math.Max(ay1, by1);
+            return width < 0 || height < 0 ? 
+                (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) :
+                (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - width * height;
+        }
+        #endregion
+
         #region Remove Duplicates From Sorted Array
         public static int RemoveDuplicatesFromSortedArray(int[] nums)
         {
@@ -286,6 +435,27 @@ namespace LeetCode
                 }
             }
             return answer;
+        }
+        #endregion
+
+        #region Running Sum of 1d Array
+        public static int[] RunningSumOf1dArray(int[] nums)
+        {
+            for (int i = 1; i < nums.Length; i++)
+            {
+                nums[i] = nums[i-1] + nums[i];
+            }
+            return nums;
+        }
+        #endregion
+
+        #region Search in a Binary Search Tree
+        public static TreeNode? SearchInABinarySearchTree(TreeNode root, int val)
+        {
+            if (root == null) return null;
+            if (root.val > val) return SearchInABinarySearchTree(root.left, val);
+            else if (root.val < val) return SearchInABinarySearchTree(root.right, val);
+            else return root;
         }
         #endregion
 
