@@ -20,13 +20,6 @@ namespace LeetCode
     {
         //Методы названы именами заданий и сортированы в алфавитном порядке ради удобства
 
-        #region Beautiful Towers I
-        public static long BeautifulTowersI(IList<int> maxHeights)
-        {
-            return 0;
-        }
-        #endregion
-
         #region Build Array From Permutation
         public static int[] BuildArrayFromPermutation(int[] nums)
         {
