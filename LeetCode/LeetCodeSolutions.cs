@@ -1,15 +1,14 @@
-﻿using System.Diagnostics.Metrics;
-using System.Linq;
+﻿using System.Drawing;
 using System.Text;
 
 namespace LeetCode
 {
-    public class TreeNode 
+    public class TreeNode
     {
-        #pragma warning disable CS8625
+#pragma warning disable CS8625
         public int val;
         public TreeNode left;
-        public TreeNode right;  
+        public TreeNode right;
         public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
         {
             this.val = val;
@@ -20,6 +19,13 @@ namespace LeetCode
     internal static class LeetCodeSolutions
     {
         //Методы названы именами заданий и сортированы в алфавитном порядке ради удобства
+
+        #region Beautiful Towers I
+        public static long BeautifulTowersI(IList<int> maxHeights)
+        {
+            return 0;
+        }
+        #endregion
 
         #region Build Array From Permutation
         public static int[] BuildArrayFromPermutation(int[] nums)
@@ -38,18 +44,10 @@ namespace LeetCode
         public static int[] GetConcatenation(int[] nums)
         {
             int[] ans = new int[nums.Length * 2];
-            int i = 0;
-            foreach (var el in ans)
+            for (int i = 0; i < ans.Length; i++)
             {
-                if (i >= nums.Length)
-                {
-                    ans[i] = nums[i - nums.Length];
-                }
-                else
-                {
-                    ans[i] = nums[i];
-                }
-                i++;
+                ans[i] = nums[i];
+                ans[i + ans.Length - 1] = nums[i];
             }
             return ans;
         }
@@ -59,7 +57,7 @@ namespace LeetCode
         public static bool ContainsDuplicate(int[] nums)
         {
             HashSet<int> set = new HashSet<int>(nums.Length);
-            for(int i = 0; i < nums.Length; i++)
+            for (int i = 0; i < nums.Length; i++)
             {
                 if (set.Contains(nums[i])) return true;
                 set.Add(nums[i]);
@@ -90,6 +88,25 @@ namespace LeetCode
 
         #endregion
 
+        #region Convert Sorted Array to Binary Search Tree
+        public static TreeNode ConvertArrayToBinarySearchTree(int[] nums)
+        {
+            return AddTreeNode(new TreeNode(nums[nums.Length / 2]), nums);
+        }
+        private static TreeNode AddTreeNode(TreeNode root, int[] nums)
+        {
+            if (root == null) root = new TreeNode(nums[nums.Length / 2]);
+            if (nums.Length <= 2)
+            {
+                if (nums.Length == 2) return new TreeNode(nums[1], new TreeNode(nums[0]));
+                return new TreeNode(nums[0]);
+            }
+            root.left = AddTreeNode(root.left, nums[..(nums.Length / 2)]);
+            root.right = AddTreeNode(root.right, nums[((nums.Length / 2) + 1)..]);
+            return root;
+        }
+        #endregion
+
         #region Decode The Message
         public static string DecodeTheMessage(string key, string message)
         {
@@ -115,6 +132,100 @@ namespace LeetCode
                 answer.Append(decodingAlphabet[message[i]]);
             }
             return answer.ToString();
+        }
+        #endregion
+
+        #region Defanging an IP Address
+        public static string DefangingAnIPAddress(string address)
+        {
+            var result = new char[address.Length + 6];
+            int j = 0;
+            for (int i = 0; i < address.Length; i++)
+            {
+                if (address[i] == '.')
+                {
+                    result[j] = '[';
+                    result[j + 1] = '.';
+                    result[j + 2] = ']';
+                    j += 2;
+                }
+                else result[j] = address[i];
+                j++;
+            }
+            return new string(result);
+        }
+        #endregion
+
+        #region Design HashMap
+        public class MyHashMap
+        {
+            private const int MULTIPLIER = 2;
+            int _count;
+            public int Size { get; private set; } = 12;
+            List<KeyValuePair<int, int>>[] lists;
+            public MyHashMap()
+            {
+                lists = new List<KeyValuePair<int, int>>[Size];
+            }
+            public MyHashMap(int size)
+            {
+                Size = size;
+                lists = new List<KeyValuePair<int, int>>[Size];
+            }
+            public void Put(int key, int value)
+            {
+                if (Size - _count < Size / 4)
+                {
+                    Size *= 2;
+                    lists = Resize();
+                }
+                var index = key.GetHashCode() % Size;
+                if (lists[index] == null)
+                {
+                    lists[index] = new List<KeyValuePair<int, int>> { new KeyValuePair<int, int>(key, value) };
+                    _count++;
+                    return;
+                }
+                for (int i = 0; i < lists[index].Count; i++)
+                {
+                    if (lists[index][i].Key == key)
+                    {
+                        lists[index][i] = new KeyValuePair<int, int>(key, value);
+                        return;
+                    }
+                }
+                lists[index].Add(new KeyValuePair<int, int>(key, value));
+            }
+            public int Get(int key)
+            {
+                var index = key.GetHashCode() % Size;
+                if (lists[index] == null) return -1;
+                foreach (var pair in lists[index])
+                    if (pair.Key == key) return pair.Value;
+                return -1;
+            }
+            public void Remove(int key)
+            {
+                var index = key.GetHashCode() % Size;
+                if (lists[index] == null) return;
+                for (int i = 0; i < lists[index].Count; i++)
+                    if (lists[index][i].Key == key) lists[index].RemoveAt(i);
+            }
+            private List<KeyValuePair<int, int>>[] Resize()
+            {
+                Size *= MULTIPLIER;
+                var temp = new MyHashMap(Size);
+                foreach (var list in lists)
+                {
+                    if (list == null) continue;
+                    foreach (var pair in list)
+                    {
+                        var index = pair.Key.GetHashCode() % Size;
+                        temp.Put(pair.Key, pair.Value);
+                    }
+                }
+                return temp.lists;
+            }
         }
         #endregion
 
@@ -223,8 +334,8 @@ namespace LeetCode
             currentNode.right = temp;
             SwapRefs(currentNode.left, temp);
             SwapRefs(currentNode.right, temp);
-        } 
-        #endregion  
+        }
+        #endregion
 
         #region Jewels In Stones
         public static int JewelsInStones(string jewels, string stones)
@@ -283,6 +394,27 @@ namespace LeetCode
 
         #endregion
 
+        #region Maximum Odd Binary Number
+        public static string MaximumOddBinaryNumber(string s)
+        {
+            int ones = 0;
+            var answer = new char[s.Length];
+            for (int i = 0; i < s.Length; i++)
+            {
+                if (s[i] == '1') ones++;
+                answer[i] = '0';
+            }
+            if (ones >= 1) answer[^1] = '1'; ones--;
+            int index = 0;
+            while (ones > 0)
+            {
+                answer[index++] = '1';
+                ones--;
+            }
+            return new string(answer);
+        }
+        #endregion
+
         #region Merge Two 2D Arrays By Summing Values
         public static int[][] MergeMergeTwo2DArraysBySummingValuesArrays(int[][] nums1, int[][] nums2)
         {
@@ -333,6 +465,25 @@ namespace LeetCode
         }
         #endregion
 
+        #region Number of Good Pairs
+        public static int NumberOfGoodPairs(int[] nums)
+        {
+            if (nums.Length == 1) return 0;
+            var uniqueNums = new Dictionary<int, int>();
+            int result = 0;
+            for (int i = 0; i < nums.Length; i++)
+            {
+                if (!uniqueNums.ContainsKey(nums[i])) uniqueNums.Add(nums[i], 1);
+                else uniqueNums[nums[i]]++;
+            }
+            foreach (int num in uniqueNums.Values)
+            {
+                result += num * (num - 1) / 2;
+            }
+            return result;
+        }
+        #endregion
+
         #region Palindrome Number
         public static bool PalindromeNumber(int x)
         {
@@ -345,6 +496,49 @@ namespace LeetCode
                 j--;
             }
             return true;
+        }
+        #endregion
+
+        #region Plus One
+        public static int[] PlusOne(int[] digits)
+        {
+            if (digits.Length == 1 && digits[0] != 9)
+            {
+                digits[0]++; return digits;
+            }
+            int[] answer;
+            var containsOnlyNines = () =>
+            {
+                for (int i = 0; i < digits.Length; i++)
+                {
+                    if (digits[i] != 9) return false;
+                }
+                return true;
+            };
+            if (containsOnlyNines())
+            {
+                answer = new int[digits.Length + 1];
+                answer[0] = 1;
+                for (int i = 1; i < answer.Length; i++) answer[i] = 0;
+                return answer;
+            }
+            else
+            {
+                for (int i = digits.Length - 1; i >= 0; i--)
+                {
+                    if (digits[i] == 9)
+                    {
+                        digits[i] = 0;
+                    }
+                    else
+                    {
+                        digits[i]++;
+                        break;
+                    }
+                }
+            }
+
+            return digits;
         }
         #endregion
 
@@ -377,9 +571,37 @@ namespace LeetCode
         {
             int width = Math.Min(ax2, bx2) - Math.Max(ax1, bx1);
             int height = Math.Min(ay2, by2) - Math.Max(ay1, by1);
-            return width < 0 || height < 0 ? 
+            return width < 0 || height < 0 ?
                 (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) :
                 (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - width * height;
+        }
+        #endregion
+
+        #region Remove Colored Pieces if Both Neighbors are the Same Color
+        public static bool RemoveColoredPiecesIfBothNeighborsAreTheSameColor(string colors)
+        {
+            int counter = 0;
+            bool turn = true;
+            int AlicesMoves = 0, BobsMoves = 0;
+            for (int i = 0; i < colors.Length; i++)
+            {
+                if (colors[i] == 'A' && turn || colors[i] == 'B' && !turn) counter++;
+                else if (colors[i] == 'A' && !turn)
+                {
+                    if (counter > 2) BobsMoves += counter - 2;
+                    turn = true;
+                    counter = 1;
+                }
+                else if (colors[i] == 'B' && turn)
+                {
+                    if (counter > 2) AlicesMoves += counter - 2;
+                    turn = false;
+                    counter = 1;
+                }
+            }
+            if (turn && counter > 2) AlicesMoves += counter - 2;
+            else if (!turn && counter > 2) BobsMoves += counter - 2;
+            return AlicesMoves > BobsMoves;
         }
         #endregion
 
@@ -398,6 +620,55 @@ namespace LeetCode
                 nums[i] = uniqueNums.ElementAt(i);
             }
             return uniqueNums.Count;
+        }
+        #endregion
+
+        #region Remove Letter To Equalize Frequency
+        public static bool RemoveLetterToEqualizeFrequency(string word)
+        {
+            var dict = new Dictionary<char, int>();
+            foreach (char letter in word)
+            {
+                if (!dict.ContainsKey(letter)) dict.Add(letter, 1);
+                else dict[letter]++;
+            }
+            int maxValue = 0;
+            int index = 0;
+            for (int i = 0; i < dict.Count; i++)
+            {
+                if (maxValue < dict.ElementAt(i).Value)
+                {
+                    maxValue = dict.ElementAt(i).Value;
+                    index = i;
+                }
+            }
+            maxValue--;
+            for (int i = 0; i < dict.Count; i++)
+            {
+                if (i == index) continue;
+                if (dict.ElementAt(i).Value != maxValue) return false;
+            }
+            return true;
+        }
+        #endregion
+
+        #region Reverse Words in a String III
+        public static string ReverseWordsInAStringIII(string s) // bruh
+        {
+            var charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            s = new string(charArray);
+            var invertedString = s.Split(' ');
+            StringBuilder answer = new StringBuilder();
+            Stack<string> words = new Stack<string>();
+
+            for (int i = 0; i < invertedString.Length; i++) words.Push(invertedString[i]);
+            for (int i = 0; i < invertedString.Length; i++)
+            {
+                answer.Append(words.Pop());
+                if (i < invertedString.Length - 1) answer.Append(' ');
+            }
+            return answer.ToString();
         }
         #endregion
 
@@ -443,7 +714,7 @@ namespace LeetCode
         {
             for (int i = 1; i < nums.Length; i++)
             {
-                nums[i] = nums[i-1] + nums[i];
+                nums[i] = nums[i - 1] + nums[i];
             }
             return nums;
         }
